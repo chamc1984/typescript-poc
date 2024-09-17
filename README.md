@@ -80,3 +80,32 @@ nvm を利用する場合、まず [公式の GitHub](https://github.com/nvm-sh/
 ```sh
 % node dist/main.ts
 ```
+
+## Web アプリにする
+
+Express を利用する例。
+
+```sh
+### Expressをインストール
+% npm install express
+### 型ファイルをインストール
+% npm install -D @types/express
+```
+
+最小サンプル実装
+
+```ts
+import http from "http";
+import express, { Request, Response } from "express";
+
+const app = express();
+
+app.get("/", (req: Request, res: Response) => {
+  return res.send("Hello World");
+});
+
+const server = http.createServer(app);
+server.listen(3000, () => {
+  console.log("Server is listening on port 3000");
+});
+```
