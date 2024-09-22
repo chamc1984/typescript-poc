@@ -1,6 +1,7 @@
 import { add } from "./sub.js";
 import http from "http";
 import express, { Express, Request, Response } from "express";
+import { getRequest, postRequest } from "./call-api.js";
 
 const app: Express = express();
 
@@ -12,6 +13,9 @@ app.get("/", (req: Request, res: Response) => {
   console.log(`5 + 10 = ${sum}`);
 
   const message: string = `${greeting} result: ${sum}.`;
+
+  getRequest();
+  postRequest();
 
   return res.send(message);
 });
