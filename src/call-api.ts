@@ -1,4 +1,5 @@
 import axios from "axios";
+import { logger } from "./util/logger.js";
 
 // axios.createを利用することで、baseURLを共有でき、ヘッダーやパラメータも共通設定できる
 const apiClient = axios.create({
@@ -10,25 +11,61 @@ const apiClient = axios.create({
   },
 });
 
+// Axiosのリクエストにインターセプターを追加してログを出力
+apiClient.interceptors.request.use(
+  (request) => {
+    logger.info(
+      `Sending ${request.method?.toUpperCase()} request to ${request.url}`
+    );
+    return request;
+  },
+  (error) => {
+    logger.error(`Request error: ${error.message}`);
+    return Promise.reject(error);
+  }
+);
+
+// Axiosのレスポンスにインターセプターを追加してログを出力
+apiClient.interceptors.response.use(
+  (response) => {
+    logger.info(
+      `Received response from ${response.config.url} with status ${response.status}`
+    );
+    return response;
+  },
+  (error) => {
+    logger.error(`Response error: ${error.message}`);
+    return Promise.reject(error);
+  }
+);
+
 export const getRequest = async () => {
-  console.log("START getRequest().");
+  logger.info("START getRequest().");
 
   try {
     const response = await apiClient.get("/get");
 
     // response.data は any型
-    console.log("GetRequest response data.headers:", response.data.headers);
+    logger.info(
+      `GetRequest responseHeaders: ${JSON.stringify(response.data.headers)}`
+    );
     // response.data は any型. 存在しないプロパティを参照すると `undefined` になる
-    console.log("GetRequest response data.header:", response.data.header);
+    logger.info(
+      `GetRequest response data.header: ${JSON.stringify(response.data.header)}`
+    );
   } catch (error) {
-    console.log("Error:", error);
+    if (axios.isAxiosError(error)) {
+      logger.error(`Request Failed: ${error.message}`, { stack: error.stack });
+    } else {
+      logger.error(`Unexpected error: ${error}`);
+    }
   }
 
-  console.log("END getRequest().");
+  logger.info("END getRequest().");
 };
 
 export const postRequest = async () => {
-  console.log("START postRequest().");
+  logger.info("START postRequest().");
   const data = {
     name: "my name",
     age: 30,
@@ -37,10 +74,14 @@ export const postRequest = async () => {
   try {
     const response = await apiClient.post("/post", data);
 
-    console.log("PostRequest response data:", response.data);
+    logger.info(`PostRequest response data: ${JSON.stringify(response.data)}`);
   } catch (error) {
-    console.log("Error:", error);
+    if (axios.isAxiosError(error)) {
+      logger.error(`Request Failed: ${error.message}`, { stack: error.stack });
+    } else {
+      logger.error(`Unexpected error: ${error}`);
+    }
   }
 
-  console.log("END postRequest().");
+  logger.info("END postRequest().");
 };
